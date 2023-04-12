@@ -50,17 +50,23 @@ Encoder responds to the poll request with 18 byte data.
 
 #### System Buttons
 
-| 0   | 1   | 2   | 3     | 4       | 5       | 6        | 7        |
-|-----|-----|-----|-------|---------|---------|----------|----------|
-| `0` | `0` | `0` | Live! | Power 0 | Power 1 | Volume 0 | Volume 1 |
+| 0   | 1   | 2   | 3     | 4        | 5         | 6        | 7        |
+|-----|-----|-----|-------|----------|-----------|----------|----------|
+| `0` | `0` | `0` | Live! | Power On | Power Off | Volume 0 | Volume 1 |
+
+Volume control is different from all other inputs. Two bits need to be considered together.
+
+`00`: Volume -
+`01`: Neutual position
+`10`: Volume +
 
 #### Joystick
 
-| 0   | 1   | 2     | 3   | 4   | 5   | 6   | 7   |
-|-----|-----|-------|-----|-----|-----|-----|-----|
-| `0` | `0` | Start | `0` | U/D | R/L | U/D | R/L |
+| 0   | 1   | 2     | 3   | 4  | 5    | 6    | 7     |
+|-----|-----|-------|-----|----|------|------|-------|
+| `0` | `0` | Start | `0` | Up | Left | Down | Right |
 
-#### Butttons
+#### Buttons
 
 | 0   | 1   | 2   | 3 | 4 | 5 | 6   | 7 |
 |-----|-----|-----|---|---|---|-----|---|
