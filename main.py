@@ -19,64 +19,21 @@ BTN_START = 0b00100000
 JOY = [BTN_START, JOY_U, JOY_D, JOY_L, JOY_R]
 BTN = [BTN_A, BTN_B, BTN_C, BTN_X]
 
-JOY_MAP = [
-    {
-        JOY_L: '1',
-        JOY_D: '2',
-        JOY_U: '3',
-        JOY_R: '4',
-        BTN_START: '9',
-    },
-    {
-        JOY_L: 'q',
-        JOY_D: 'w',
-        JOY_U: 'e',
-        JOY_R: 'r',
-        BTN_START: 'o',
-    },
-    {
-        JOY_L: 'a',
-        JOY_D: 's',
-        JOY_U: 'd',
-        JOY_R: 'f',
-        BTN_START: 'l',
-    },
-    {
-        JOY_L: 'z',
-        JOY_D: 'x',
-        JOY_U: 'c',
-        JOY_R: 'v',
-        BTN_START: '.',
-    },
-]
-BTN_MAP = [
-    {
-        BTN_A: '5',
-        BTN_B: '6',
-        BTN_C: '7',
-        BTN_X: '8',
-    },
-    {
-        BTN_A: 't',
-        BTN_B: 'y',
-        BTN_C: 'u',
-        BTN_X: 'i',
-    },
-    {
-        BTN_A: 'g',
-        BTN_B: 'h',
-        BTN_C: 'j',
-        BTN_X: 'k',
-    },
-    {
-        BTN_A: 'b',
-        BTN_B: 'n',
-        BTN_C: 'm',
-        BTN_X: ',',
-    },
-]
+JOY_MAP = {
+    JOY_R: keyboard.Key.right,
+    JOY_L: keyboard.Key.left,
+    JOY_U: keyboard.Key.up,
+    JOY_D: keyboard.Key.down,
+    BTN_START: keyboard.KeyCode.from_char('1'),
+}
+BTN_MAP = {
+    BTN_A: keyboard.Key.ctrl_l,
+    BTN_B: keyboard.Key.alt_l,
+    BTN_C: keyboard.Key.space,
+    BTN_X: keyboard.Key.shift_l,
+}
 
-kb = keyboard.Controller()
+kb = [keyboard.Controller() for _ in range(5)]
 
 class Player():
 
@@ -113,7 +70,7 @@ class System():
         diff = self._prev_input ^ input
 
         if SYS_LIVE & diff:
-            self._keyboard.touch('\\', bool(SYS_LIVE & input))
+            self._keyboard.touch(keyboard.Key.tab, bool(SYS_LIVE & input))
         if SYS_VOLUME & diff:
             vol = SYS_VOLUME & input
             if vol == 0b00:
@@ -124,8 +81,8 @@ class System():
         self._prev_input = input
         
 
-system = System(kb)
-players = [Player(kb, JOY_MAP[p], BTN_MAP[p]) for p in range(4)]
+system = System(kb[4])
+players = [Player(kb[p], JOY_MAP, BTN_MAP) for p in range(4)]
 
 with serial.Serial('/dev/cu.usbserial-A50285BI', 115200) as s:
     while True:
