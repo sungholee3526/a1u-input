@@ -84,7 +84,7 @@ class System():
 system = System(kb[4])
 players = [Player(kb[p], JOY_MAP, BTN_MAP) for p in range(4)]
 
-with serial.Serial('/dev/cu.usbserial-A50285BI', 115200) as s:
+with serial.Serial('/dev/ttyUSB0', 115200) as s:
     while True:
         s.write(REQUEST_BYTES)
         res = s.read(18)
