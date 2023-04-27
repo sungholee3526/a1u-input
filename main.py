@@ -1,5 +1,6 @@
 import serial
 from pynput import keyboard
+import uinput
 
 REQUEST_BYTES = bytes([0xA6, 0x01, 0x00])
 
@@ -20,30 +21,52 @@ JOY = [BTN_START, JOY_U, JOY_D, JOY_L, JOY_R]
 BTN = [BTN_A, BTN_B, BTN_C, BTN_X]
 
 JOY_MAP = {
-    JOY_R: keyboard.Key.right,
-    JOY_L: keyboard.Key.left,
-    JOY_U: keyboard.Key.up,
-    JOY_D: keyboard.Key.down,
-    BTN_START: keyboard.KeyCode.from_char('1'),
+    JOY_R: uinput.BTN_DPAD_RIGHT,
+    JOY_L: uinput.BTN_DPAD_LEFT,
+    JOY_U: uinput.BTN_DPAD_UP,
+    JOY_D: uinput.BTN_DPAD_DOWN,
+    BTN_START: uinput.BTN_START,
 }
 BTN_MAP = {
-    BTN_A: keyboard.Key.ctrl_l,
-    BTN_B: keyboard.Key.alt_l,
-    BTN_C: keyboard.Key.space,
-    BTN_X: keyboard.Key.shift_l,
+    BTN_A: uinput.BTN_A,
+    BTN_B: uinput.BTN_B,
+    BTN_C: uinput.BTN_Y,
+    BTN_X: uinput.BTN_X,
 }
 
-kb = [keyboard.Controller() for _ in range(5)]
+events = (
+    uinput.BTN_A,
+    uinput.BTN_B,
+    uinput.BTN_X,
+    uinput.BTN_Y,
+    uinput.BTN_DPAD_UP,
+    uinput.BTN_DPAD_DOWN,
+    uinput.BTN_DPAD_LEFT,
+    uinput.BTN_DPAD_RIGHT,
+    uinput.BTN_START,
+)
+
+gamepads = [
+    uinput.Device(
+        events,
+        vendor=0x045e,
+        product=0x028e,
+        version=0x110,
+        name="Microsoft X-Box 360 pad",
+    ) for _ in range(4)
+]
+kb = keyboard.Controller()
+
 
 class Player():
 
-    def __init__(self, keyboard: keyboard.Controller, joy_map: dict, btn_map: dict):
-        self._keyboard = keyboard
+    def __init__(self, gamepad: uinput.Device, joy_map: dict, btn_map: dict):
+        self._gamepad = gamepad
         self._prev_joystick = 0
         self._prev_button = 0
         self._joy_map = joy_map
         self._btn_map = btn_map
-    
+
     def handle_input(self, input: bytes):
         joystick_input = input[0]
         button_input = input[1]
@@ -51,14 +74,17 @@ class Player():
         joy_diff = self._prev_joystick ^ joystick_input
         for joy_code in JOY:
             if joy_code & joy_diff:
-                self._keyboard.touch(self._joy_map[joy_code], bool(joy_code & joystick_input))
+                self._gamepad.emit(self._joy_map[joy_code],
+                                   bool(joy_code & joystick_input))
         btn_diff = self._prev_button ^ button_input
         for btn_code in BTN:
             if btn_code & btn_diff:
-                self._keyboard.touch(self._btn_map[btn_code], bool(btn_code & button_input))
+                self._gamepad.emit(self._btn_map[btn_code],
+                                   bool(btn_code & button_input))
 
         self._prev_joystick = joystick_input
         self._prev_button = button_input
+
 
 class System():
 
@@ -77,12 +103,12 @@ class System():
                 self._keyboard.tap(keyboard.Key.media_volume_down)
             elif vol == 0b10:
                 self._keyboard.tap(keyboard.Key.media_volume_up)
-        
-        self._prev_input = input
-        
 
-system = System(kb[4])
-players = [Player(kb[p], JOY_MAP, BTN_MAP) for p in range(4)]
+        self._prev_input = input
+
+
+system = System(kb)
+players = [Player(gamepads[p], JOY_MAP, BTN_MAP) for p in range(4)]
 
 with serial.Serial('/dev/ttyUSB0', 115200) as s:
     while True:

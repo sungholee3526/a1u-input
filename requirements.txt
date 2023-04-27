@@ -1,7 +1,6 @@
+evdev==1.6.1
 pynput==1.7.6
-pyobjc-core==9.0.1
-pyobjc-framework-ApplicationServices==9.0.1
-pyobjc-framework-Cocoa==9.0.1
-pyobjc-framework-Quartz==9.0.1
 pyserial==3.5
+python-uinput==0.11.2
+python-xlib==0.33
 six==1.16.0
